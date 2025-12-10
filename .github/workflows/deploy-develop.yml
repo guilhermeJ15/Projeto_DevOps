@@ -10,28 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout do código
+      - name: checkout do código
         uses: actions/checkout@v3
 
-      - name: 🔑 Criar chave SSH a partir do Secret
+      - name:  Criar chave SSH a partir do Secret
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_KEY }}" > ~/.ssh/devops-key.pem
           chmod 600 ~/.ssh/devops-key.pem
 
-      - name: 🚀 Deploy na EC2
+      - name: Deploy na EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/devops-key.pem ubuntu@${{ secrets.EC2_IP }} '
             cd ~/Projeto_DevOps
 
-            echo "➡️ Atualizando repositório"
+            echo "Atualizando repositório"
             git pull origin develop
 
-            echo "⬇️ Derrubando containers antigos"
+            echo "Derrubando containers antigos"
             docker-compose down || true
 
-            echo "⬆️ Subindo containers atualizados"
+            echo "Subindo containers atualizados"
             docker-compose up -d --build
 
-            echo "✔ Deploy finalizado"
+            echo "Deploy finalizado"
           '

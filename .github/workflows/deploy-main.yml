@@ -1,0 +1,37 @@
+name: Deploy Backend to EC2 (MAIN)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Criar chave SSH a partir do Secret
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/devops-key.pem
+          chmod 600 ~/.ssh/devops-key.pem
+
+      - name: Deploy na EC2 via MAIN
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/devops-key.pem ubuntu@${{ secrets.EC2_IP }} '
+            cd ~/Projeto_DevOps
+
+            echo "Atualizando repositório"
+            git pull origin main
+
+            echo "Derrubando containers antigos"
+            docker-compose down || true
+
+            echo "Subindo containers atualizados"
+            docker-compose up -d --build
+
+            echo " Deploy finalizado usando a branch MAIN"
+          '
