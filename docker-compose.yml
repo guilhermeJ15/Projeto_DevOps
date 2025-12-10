@@ -1,0 +1,76 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: devops_backend
+    restart: unless-stopped
+    environment:
+      - MONGO_URI="mongodb+srv://guilhermejonatas15_db_user:152004cB$$@cluster0.cqefm5x.mongodb.net/devopsdb?retryWrites=true&w=majority"
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - devnet
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/items', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})\""]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  mongo:
+    image: mongo:6
+    container_name: devops_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: devopsdb
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand({ ping: 1 })\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devnet
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: devops_mongo_express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - devnet
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devops_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - devnet
+
+volumes:
+  mongo_data:
+
+networks:
+  devnet:
+    driver: bridge
