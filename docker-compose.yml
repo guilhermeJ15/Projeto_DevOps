@@ -6,7 +6,7 @@ services:
     container_name: devops_backend
     restart: unless-stopped
     environment:
-      - MONGO_URI=mongodb+srv://guilhermejonatas15_db_user:152004cB\$\@cluster0.cqefm5x.mongodb.net/devopsdb?retryWrites=true&w=majority
+      - MONGO_URI=mongodb+srv://guilhermejonatas15_db_user:152004cB@cluster2.1s88web.mongodb.net/devopsdb?retryWrites=true&w=majority
       - PORT=3000
     ports:
       - "3000:3000"
