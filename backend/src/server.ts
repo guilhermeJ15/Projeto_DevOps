@@ -29,7 +29,7 @@ async function startServer() {
     });
   } catch (error) {
     console.error(" Erro ao iniciar servidor:", error);
-    process.exit(1); // encerra se falhar
+    process.exit(1); 
   }
 }
 
